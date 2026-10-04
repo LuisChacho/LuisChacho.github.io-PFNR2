@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Evaluación de Razonamiento Numérico</title>
+  <link rel="stylesheet" href="index.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Evaluación de Razonamiento Numérico</h1>
+      <p class="subtitle">Prueba de Diagnóstico y Entrenamiento Rapidez Numérica</p>
+      <div class="timer-card" id="timer-card">
+        <span>Tiempo restante:</span>
+        <strong id="time-display">50:00</strong>
+      </div>
+    </header>
+
+    <main id="quiz-container">
+      <form id="quiz-form">
+        <div id="questions-list"></div>
+        <div class="action-bar">
+          <button type="submit" id="submit-btn" class="btn btn-primary">Finalizar y Enviar Examen</button>
+        </div>
+      </form>
+    </main>
+
+    <section id="result-card" class="result-card hidden">
+      <h2>Resultado Final</h2>
+      <div class="score-display">
+        <span id="score-text">0 / 50</span>
+        <p id="percentage-text">0%</p>
+      </div>
+      <div id="feedback-message" class="feedback"></div>
+      <button onclick="location.reload()" class="btn btn-secondary">Intentar de nuevo</button>
+    </section>
+  </div>
+
+  <script src="index.js"></script>
+</body>
+</html>
