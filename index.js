@@ -82,8 +82,19 @@ const questions = [
   { id: 50, text: "50. Resolver: 10 - [ 2 + 3 × (4 - 1) ]", options: ["-1", "1", "3", "5"], answer: 0 }
 ];
 
+// VARIABLES DE ESTADO
 let totalTime = 3000; // 50 minutos
+let warnings = 0;
+const MAX_WARNINGS = 3;
+let timerInterval = null;
+let isSubmitted = false;
+
+// ELEMENTOS DOM
+const startModal = document.getElementById("start-modal");
+const startBtn = document.getElementById("start-btn");
+const mainContainer = document.getElementById("main-container");
 const timeDisplay = document.getElementById("time-display");
+const warningCount = document.getElementById("warning-count");
 const questionsList = document.getElementById("questions-list");
 const quizForm = document.getElementById("quiz-form");
 const quizContainer = document.getElementById("quiz-container");
@@ -91,46 +102,112 @@ const resultCard = document.getElementById("result-card");
 const scoreText = document.getElementById("score-text");
 const percentageText = document.getElementById("percentage-text");
 const feedbackMessage = document.getElementById("feedback-message");
+const submissionReason = document.getElementById("submission-reason");
 
+// RENDERIZAR PREGUNTAS
 function renderQuestions() {
-  questionsList.innerHTML = questions.map((q, index) => `
-    <div class="question-block">
-      <p class="question-title">${q.text}</p>
-      <div class="options-group">
-        ${q.options.map((opt, optIndex) => `
-          <label class="option-label">
-            <input type="radio" name="q${index}" value="${optIndex}" required>
-            <span>${opt}</span>
-          </label>
-        `).join('')}
+  const savedAnswers = JSON.parse(localStorage.getItem("num_quiz_answers") || "{}");
+
+  questionsList.innerHTML = questions.map((q, index) => {
+    const isChecked = (optIndex) => savedAnswers[`q${index}`] == optIndex ? 'checked' : '';
+    return `
+      <div class="question-block">
+        <p class="question-title">${q.text}</p>
+        <div class="options-group">
+          ${q.options.map((opt, optIndex) => `
+            <label class="option-label">
+              <input type="radio" name="q${index}" value="${optIndex}" ${isChecked(optIndex)} onchange="saveAnswer('q${index}',${optIndex})">
+              <span>${opt}</span>
+            </label>
+          `).join('')}
+        </div>
       </div>
-    </div>
-  `).join('');
+    `;
+  }).join('');
 }
 
+// PERSISTENCIA
+window.saveAnswer = function(questionKey, val) {
+  const savedAnswers = JSON.parse(localStorage.getItem("num_quiz_answers") || "{}");
+  savedAnswers[questionKey] = val;
+  localStorage.setItem("num_quiz_answers", JSON.stringify(savedAnswers));
+};
+
+// CRONÓMETRO
 function startTimer() {
-  const timer = setInterval(() => {
+  timerInterval = setInterval(() => {
     totalTime--;
     const minutes = Math.floor(totalTime / 60);
     const seconds = totalTime % 60;
     timeDisplay.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
 
     if (totalTime <= 0) {
-      clearInterval(timer);
-      submitQuiz();
+      clearInterval(timerInterval);
+      submitQuiz("Tiempo límite agotado.");
     }
   }, 1000);
 }
 
-function submitQuiz(e) {
-  if (e) e.preventDefault();
+// SEGURIDAD: DETECCIÓN DE CAMBIO DE PESTAÑA / VENTANA
+function handleSecurityViolation() {
+  if (isSubmitted) return;
+
+  warnings++;
+  warningCount.textContent = `${warnings} / ${MAX_WARNINGS}`;
+
+  if (warnings >= MAX_WARNINGS) {
+    submitQuiz("Envío automático por violar las normas de supervisión (múltiples cambios de pestaña/foco).");
+  } else {
+    alert(`¡ADVERTENCIA ${warnings}/${MAX_WARNINGS}!\nNo está permitido salir de la pestaña del examen.`);
+  }
+}
+
+// SEGURIDAD: RESTRICCIÓN DE TECLAS Y ACCIONES
+function setupSecurityListeners() {
+  window.addEventListener("blur", handleSecurityViolation);
+
+  document.addEventListener("keydown", (e) => {
+    if (
+      e.key === "F12" ||
+      (e.ctrlKey && e.shiftKey && (e.key === "I" || e.key === "J" || e.key === "C")) ||
+      (e.ctrlKey && (e.key === "c" || e.key === "v" || e.key === "u" || e.key === "a")) ||
+      e.key === "Alt"
+    ) {
+      e.preventDefault();
+    }
+  });
+
+  document.addEventListener("selectstart", (e) => e.preventDefault());
+}
+
+// INICIAR EVALUACIÓN CON PANTALLA COMPLETA
+startBtn.addEventListener("click", () => {
+  if (document.documentElement.requestFullscreen) {
+    document.documentElement.requestFullscreen().catch(() => {});
+  }
+  startModal.classList.add("hidden");
+  mainContainer.classList.remove("blur-content");
+  mainContainer.style.pointerEvents = "auto";
+  
+  renderQuestions();
+  startTimer();
+  setupSecurityListeners();
+});
+
+// ENVÍO Y EVALUACIÓN
+function submitQuiz(reason = "Entrega regular por parte del estudiante.") {
+  if (isSubmitted) return;
+  isSubmitted = true;
+
+  clearInterval(timerInterval);
+  window.removeEventListener("blur", handleSecurityViolation);
 
   let score = 0;
-  const formData = new FormData(quizForm);
+  const savedAnswers = JSON.parse(localStorage.getItem("num_quiz_answers") || "{}");
 
   questions.forEach((q, index) => {
-    const selected = formData.get(`q${index}`);
-    if (parseInt(selected) === q.answer) {
+    const selected = savedAnswers[`q${index}`];
+    if (selected !== undefined && parseInt(selected) === q.answer) {
       score++;
     }
   });
@@ -143,21 +220,23 @@ function submitQuiz(e) {
 
   scoreText.textContent = `${score} / ${questions.length}`;
   percentageText.textContent = `${percentage}%`;
+  submissionReason.textContent = `Motivo de cierre: ${reason}`;
 
   if (percentage >= 80) {
-    feedbackMessage.textContent = "¡Excelente desempeño! Gran dominio de propiedades algebraicas y agilidad numérica.";
+    feedbackMessage.textContent = "¡Excelente desempeño! Tienes una agilidad matemática y dominio de propiedades de primer nivel.";
     feedbackMessage.style.color = "var(--success-color)";
   } else if (percentage >= 60) {
-    feedbackMessage.textContent = "Buen trabajo, pero conviene revisar leyes de exponentes y simplificación de radicales.";
+    feedbackMessage.textContent = "Buen trabajo, pero te conviene repasar simplificación de radicales, potencias y regla de tres.";
     feedbackMessage.style.color = "var(--accent-color)";
   } else {
-    feedbackMessage.textContent = "Se requiere más práctica. Repasa leyes de potencias, raíces, fracciones y planteamiento.";
-    feedbackMessage.style.color = "var(--error-color)";
+    feedbackMessage.textContent = "Se requiere más práctica. Refuerza leyes de exponentes, porcentajes, razones y ecuaciones.";
+    feedbackMessage.style.color = "var(--danger-color)";
   }
+
+  localStorage.removeItem("num_quiz_answers");
 }
 
-document.addEventListener("DOMContentLoaded", () => {
-  renderQuestions();
-  startTimer();
-  quizForm.addEventListener("submit", submitQuiz);
+quizForm.addEventListener("submit", (e) => {
+  e.preventDefault();
+  submitQuiz("Examen entregado manualmente.");
 });

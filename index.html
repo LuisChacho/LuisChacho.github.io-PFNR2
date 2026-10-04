@@ -6,14 +6,38 @@
   <title>Evaluación de Razonamiento Numérico</title>
   <link rel="stylesheet" href="index.css">
 </head>
-<body>
-  <div class="container">
+<body oncontextmenu="return false;">
+
+  <!-- MODAL DE INICIO Y SEGURIDAD -->
+  <div id="start-modal" class="modal-overlay">
+    <div class="modal-content">
+      <h2>Instrucciones y Normas de Seguridad</h2>
+      <p>Esta evaluación cuenta con controles supervisados para garantizar la transparencia del proceso:</p>
+      <ul>
+        <li><strong>Modo Pantalla Completa:</strong> Es obligatorio para realizar el examen.</li>
+        <li><strong>Foco de Pantalla:</strong> Salir de la pestaña o cambiar de ventana registrará una advertencia. Al acumular 3 advertencias el examen se enviará automáticamente.</li>
+        <li><strong>Restricciones:</strong> Clic derecho, copia de texto y combinaciones de teclas (Alt+Tab, Ctrl+C, Ctrl+V, F12) están desactivados.</li>
+      </ul>
+      <p class="time-notice"><strong>Tiempo límite:</strong> 50 minutos para 50 reactivos.</p>
+      <button id="start-btn" class="btn btn-primary">Entendido, Iniciar Examen</button>
+    </div>
+  </div>
+
+  <div class="container blur-content" id="main-container">
     <header>
-      <h1>Evaluación de Razonamiento Numérico</h1>
-      <p class="subtitle">Prueba de Diagnóstico y Entrenamiento Rapidez Numérica</p>
-      <div class="timer-card" id="timer-card">
-        <span>Tiempo restante:</span>
-        <strong id="time-display">50:00</strong>
+      <div class="header-info">
+        <h1>Evaluación de Razonamiento Numérico</h1>
+        <p class="subtitle">Prueba de Aptitud y Diagnóstico Numérico</p>
+      </div>
+      <div class="security-status">
+        <div class="timer-card" id="timer-card">
+          <span>Tiempo:</span>
+          <strong id="time-display">50:00</strong>
+        </div>
+        <div class="warnings-card">
+          <span>Advertencias:</span>
+          <strong id="warning-count">0 / 3</strong>
+        </div>
       </div>
     </header>
 
@@ -33,7 +57,7 @@
         <p id="percentage-text">0%</p>
       </div>
       <div id="feedback-message" class="feedback"></div>
-      <button onclick="location.reload()" class="btn btn-secondary">Intentar de nuevo</button>
+      <p id="submission-reason" class="submission-reason"></p>
     </section>
   </div>
 
