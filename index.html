@@ -3,60 +3,95 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Evaluación de Razonamiento Numérico</title>
+  <title>Plataforma de Evaluación - Razonamiento Numérico</title>
   <link rel="stylesheet" href="index.css">
 </head>
 <body oncontextmenu="return false;">
 
-  <!-- MODAL DE INICIO Y SEGURIDAD -->
+  <!-- PANTALLA DE REGISTRO E INSTRUCCIONES (MODAL INICIAL) -->
   <div id="start-modal" class="modal-overlay">
-    <div class="modal-content">
-      <h2>Instrucciones y Normas de Seguridad</h2>
-      <p>Esta evaluación cuenta con controles supervisados para garantizar la transparencia del proceso:</p>
-      <ul>
-        <li><strong>Modo Pantalla Completa:</strong> Es obligatorio para realizar el examen.</li>
-        <li><strong>Foco de Pantalla:</strong> Salir de la pestaña o cambiar de ventana registrará una advertencia. Al acumular 3 advertencias el examen se enviará automáticamente.</li>
-        <li><strong>Restricciones:</strong> Clic derecho, copia de texto y combinaciones de teclas (Alt+Tab, Ctrl+C, Ctrl+V, F12) están desactivados.</li>
-      </ul>
-      <p class="time-notice"><strong>Tiempo límite:</strong> 50 minutos para 50 reactivos.</p>
-      <button id="start-btn" class="btn btn-primary">Entendido, Iniciar Examen</button>
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="gov-badge">SISTEMA OFICIAL DE EVALUACIÓN</div>
+        <h2>Examen de Razonamiento Numérico</h2>
+        <p>Prueba de Aptitud para el Acceso a la Educación Superior</p>
+      </div>
+
+      <form id="student-form" class="modal-body">
+        <div class="form-group">
+          <label for="student-name">Nombre y Apellidos Completos:</label>
+          <input type="text" id="student-name" placeholder="Ej. Juan Carlos Pérez" required autocomplete="off">
+        </div>
+
+        <div class="instructions-box">
+          <h3>Indicaciones Generales y Seguridad</h3>
+          <ul>
+            <li><strong>Tiempo disponible:</strong> 50 minutos para responder 50 preguntas.</li>
+            <li><strong>Supervisión activa:</strong> La prueba debe realizarse en modo pantalla completa.</li>
+            <li><strong>Pérdida de foco:</strong> Cambiar de pestaña o minimizar el navegador generará una advertencia. Al acumular <strong>3 advertencias</strong>, la prueba se enviará automáticamente.</li>
+            <li><strong>Restricciones:</strong> Clic derecho, copiado de texto y atajos de teclado están inhabilitados.</li>
+          </ul>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-block">Iniciar Evaluación</button>
+      </form>
     </div>
   </div>
 
-  <div class="container blur-content" id="main-container">
-    <header>
-      <div class="header-info">
-        <h1>Evaluación de Razonamiento Numérico</h1>
-        <p class="subtitle">Prueba de Aptitud y Diagnóstico Numérico</p>
+  <!-- PANTALLA PRINCIPAL DE LA PRUEBA -->
+  <div class="app-container blur-content" id="main-container">
+    <header class="app-header">
+      <div class="user-info">
+        <span class="info-label">Aspirante:</span>
+        <strong id="display-student-name">---</strong>
       </div>
-      <div class="security-status">
-        <div class="timer-card" id="timer-card">
-          <span>Tiempo:</span>
+      <div class="status-bar">
+        <div class="status-item timer-box">
+          <span>Tiempo Restante:</span>
           <strong id="time-display">50:00</strong>
         </div>
-        <div class="warnings-card">
+        <div class="status-item warning-box">
           <span>Advertencias:</span>
           <strong id="warning-count">0 / 3</strong>
         </div>
       </div>
     </header>
 
-    <main id="quiz-container">
+    <main id="quiz-container" class="quiz-layout">
       <form id="quiz-form">
         <div id="questions-list"></div>
-        <div class="action-bar">
-          <button type="submit" id="submit-btn" class="btn btn-primary">Finalizar y Enviar Examen</button>
+        <div class="footer-actions">
+          <button type="submit" class="btn btn-success">Finalizar y Enviar Prueba</button>
         </div>
       </form>
     </main>
 
+    <!-- REPORTES Y RETROALIMENTACIÓN FINAL -->
     <section id="result-card" class="result-card hidden">
-      <h2>Resultado Final</h2>
-      <div class="score-display">
-        <span id="score-text">0 / 50</span>
-        <p id="percentage-text">0%</p>
+      <div class="result-header">
+        <h2>Comprobante de Resultado de Evaluación</h2>
+        <p>Aspirante: <strong id="res-student-name">---</strong></p>
       </div>
-      <div id="feedback-message" class="feedback"></div>
+
+      <div class="score-summary">
+        <div class="score-box">
+          <span class="score-title">Puntaje Obtenido</span>
+          <span class="score-value" id="score-text">0 / 50</span>
+        </div>
+        <div class="score-box">
+          <span class="score-title">Porcentaje de Aciertos</span>
+          <span class="score-value" id="percentage-text">0%</span>
+        </div>
+      </div>
+
+      <div class="feedback-container">
+        <h3>Diagnóstico General</h3>
+        <p id="feedback-message" class="feedback-main"></p>
+        
+        <h3>Retroalimentación por Componente</h3>
+        <div id="topic-feedback-list" class="topic-grid"></div>
+      </div>
+
       <p id="submission-reason" class="submission-reason"></p>
     </section>
   </div>
